@@ -1,4 +1,3 @@
-Create script.js
 const canvas = document.getElementById('heartCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -9,7 +8,6 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-// Variables de configuración de la animación
 let speedMultiplier = 1;
 let sizeMultiplier = 1;
 let isPaused = false;
@@ -22,7 +20,6 @@ const colorPalettes = [
     { name: "Dorado Mágico", colors: ['#ffd700', '#ffaa00', '#ffea75', '#e65100', '#fff'] }
 ];
 
-// Generar puntos de la curva matemática del corazón
 const heartPoints = [];
 const pointCount = 350;
 for (let i = 0; i < pointCount; i++) {
@@ -57,14 +54,11 @@ class HeartParticle {
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2 - 20;
         const scale = (Math.min(canvas.width, canvas.height) / 35) * sizeMultiplier;
-
         const pulse = 1 + Math.sin(Date.now() / 300) * 0.03;
         const x = centerX + this.baseX * scale * pulse;
         const y = centerY + this.baseY * scale * pulse;
-
         const palette = colorPalettes[colorModeIndex].colors;
         const color = palette[Math.floor((this.angle + Date.now() / 500) % palette.length)];
-
         ctx.save();
         ctx.beginPath();
         ctx.arc(x, y, (Math.random() * 2 + 2) * sizeMultiplier, 0, Math.PI * 2);
@@ -76,7 +70,6 @@ class HeartParticle {
     }
 }
 
-// Clase para las partículas del estallido central ("Para ti")
 class BurstParticle {
     constructor(x, y, vx, vy, color) {
         this.x = x;
@@ -87,13 +80,11 @@ class BurstParticle {
         this.color = color;
         this.size = Math.random() * 2.5 + 1;
     }
-
     update() {
         this.x += this.vx * speedMultiplier;
         this.y += this.vy * speedMultiplier;
         this.alpha -= 0.015 * speedMultiplier;
     }
-
     draw() {
         if (this.alpha <= 0) return;
         ctx.save();
@@ -113,13 +104,10 @@ let burstParticles = [];
 let textBurstAlpha = 0;
 let textScale = 0.5;
 
-// Función para disparar el estallido central con el texto "Para ti"
 function triggerBurst() {
     if (isPaused) return;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2 - 20;
-    
-    // Generar partículas radiales de estallido
     const palette = colorPalettes[colorModeIndex].colors;
     for (let i = 0; i < 90; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -127,13 +115,9 @@ function triggerBurst() {
         const color = palette[Math.floor(Math.random() * palette.length)];
         burstParticles.push(new BurstParticle(centerX, centerY, Math.cos(angle) * speed, Math.sin(angle) * speed, color));
     }
-
-    // Activar animación del texto flotante
     textBurstAlpha = 1.5;
     textScale = 0.5;
 }
-
-// Disparar estallido automático cada 4 segundos
 setInterval(triggerBurst, 4000);
 
 let lastTime = performance.now();
@@ -153,14 +137,10 @@ function animate(now) {
     if (!isPaused) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Dibujar corazón
         particles.forEach(p => {
             p.update();
             p.draw();
         });
-
-        // Actualizar y dibujar partículas de estallido
         for (let i = burstParticles.length - 1; i >= 0; i--) {
             let bp = burstParticles[i];
             bp.update();
@@ -169,58 +149,44 @@ function animate(now) {
                 burstParticles.splice(i, 1);
             }
         }
-
-        // Renderizar el texto "Para ti" surgiendo del centro
         if (textBurstAlpha > 0) {
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2 - 20;
-
             textScale += 0.015;
             textBurstAlpha -= 0.012;
-
             ctx.save();
             ctx.font = `600 ${Math.floor(32 * sizeMultiplier * Math.min(textScale, 1.2))}px 'Pacifico', cursive`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            
             const palette = colorPalettes[colorModeIndex].colors;
             ctx.fillStyle = palette[0];
             ctx.shadowBlur = 25;
             ctx.shadowColor = palette[0];
             ctx.globalAlpha = Math.max(textBurstAlpha, 0);
-            
-            ctx.fillText("Para ti bebe :)", centerX, centerY);
-            ctx.restore(); 
+            ctx.fillText("Para ti", centerX, centerY);
+            ctx.restore();
         }
     }
-
     requestAnimationFrame(animate);
 }
-
 requestAnimationFrame(animate);
-
-// --- INTERACTIVIDAD DE LOS BOTONES ---
 
 document.getElementById('colorBtn').addEventListener('click', () => {
     colorModeIndex = (colorModeIndex + 1) % colorPalettes.length;
     document.getElementById('currentMode').innerText = colorPalettes[colorModeIndex].name;
 });
-
 document.getElementById('speedBtn').addEventListener('click', () => {
     speedMultiplier = speedMultiplier === 1 ? 2 : (speedMultiplier === 2 ? 0.5 : 1);
 });
-
 document.getElementById('sizeBtn').addEventListener('click', () => {
     sizeMultiplier = sizeMultiplier === 1 ? 1.3 : (sizeMultiplier === 1.3 ? 0.7 : 1);
 });
-
 let pausedState = false;
 document.getElementById('pauseBtn').addEventListener('click', (e) => {
     isPaused = !isPaused;
     pausedState = !pausedState;
     e.target.style.background = pausedState ? 'rgba(255, 255, 255, 0.4)' : '';
 });
-
 document.getElementById('resetBtn').addEventListener('click', () => {
     speedMultiplier = 1;
     sizeMultiplier = 1;
@@ -231,7 +197,6 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     textBurstAlpha = 0;
     document.getElementById('currentMode').innerText = colorPalettes[0].name;
 });
-
 let musicPlaying = false;
 document.getElementById('musicBtn').addEventListener('click', (e) => {
     const music = document.getElementById('bgMusic');
@@ -245,21 +210,15 @@ document.getElementById('musicBtn').addEventListener('click', (e) => {
     }
 });
 
-// --- AUTOPRODUCCIÓN AL PRIMER CLIC EN LA PÁGINA ---
+// Autoplay al primer clic
 document.body.addEventListener('click', function autoPlayMusic() {
     const music = document.getElementById('bgMusic');
     const musicBtn = document.getElementById('musicBtn');
-    
-    // Si la música está pausada, la reproducimos
     if (music.paused) {
         music.play().then(() => {
             musicPlaying = true;
             if (musicBtn) musicBtn.style.background = 'rgba(255, 255, 255, 0.4)';
-        }).catch(err => {
-            console.log("El navegador bloqueó la reproducción automática: ", err);
-        });
+        }).catch(err => console.log("Autoplay bloqueado", err));
     }
-    
-    // Remueve el evento para que solo ocurra en el primer clic y no vuelva a interferir
     document.body.removeEventListener('click', autoPlayMusic);
 }, { once: true });
